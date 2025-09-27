@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="content-type"/>
+<script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+<style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+<style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.css" rel="stylesheet"/>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" rel="stylesheet"/>
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css" rel="stylesheet"/>
+<meta content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<style>
+                #map_fc07077eb93e7396ac9f3c31d203cb63 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+            </style>
+<style>
+body {
+    background-color: #0d0d0d;
+    background-image: radial-gradient(circle at 20% 20%, rgba(255,140,0,0.15), transparent 25%),
+                      radial-gradient(circle at 80% 30%, rgba(128,0,128,0.15), transparent 25%),
+                      radial-gradient(circle at 50% 80%, rgba(255,0,0,0.1), transparent 25%);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+</style>
+<style>
+/* 更多萬聖節視覺元素 */
+.halloween-overlay {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 10000;
+  font-family: 'Segoe UI', Arial;
+  color: #ffb347;
+  text-shadow: 0 0 6px #ff7b00;
+  background: rgba(0,0,0,0.35);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,120,0,0.6);
+}
+
+/* 漂浮的小鬼 */
+.ghost {
+  position: fixed;
+  width: 80px;
+  height: 100px;
+  background: url('https://upload.wikimedia.org/wikipedia/commons/4/4f/White_ghost_icon.svg') no-repeat center/contain;
+  top: 12%;
+  left: 8%;
+  opacity: 0.9;
+  z-index: 9998;
+  animation: floaty 6s ease-in-out infinite;
+}
+.ghost.ghost2 { top: 22%; left: 78%; animation-delay: 2s; width:60px; }
+.ghost.ghost3 { top: 70%; left: 12%; animation-delay: 4s; width:70px; }
+@keyframes floaty {
+  0% { transform: translateY(0px) rotate(-3deg); }
+  50% { transform: translateY(-18px) rotate(3deg); }
+  100% { transform: translateY(0px) rotate(-3deg); }
+}
+
+/* 調整原先 AwesomeMarkers 顯示替換（改用南瓜/鬼圖片） */
+.awesome-marker-icon {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.awesome-marker-icon img {
+  display:block;
+  margin: 0 auto;
+  pointer-events: none;
+}
+
+/* 全畫面南瓜框（微透明） */
+.halloween-border {
+  position: fixed;
+  pointer-events: none;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 9997;
+  background-image: 
+    radial-gradient(circle at 5% 5%, rgba(255,140,0,0.06), transparent 6%),
+    radial-gradient(circle at 95% 95%, rgba(128,0,128,0.04), transparent 6%);
+  box-shadow: inset 0 0 120px rgba(0,0,0,0.6);
+}
+
+/* 音樂播放按鈕 */
+.audio-controls {
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.play-btn {
+  background: linear-gradient(180deg,#ff8c00,#ff5500);
+  color: #200;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  font-weight: 700;
+}
+.play-btn.paused { background: linear-gradient(180deg,#444,#222); color:#fff; }
+
+/* 小提示 */
+.hint { font-size:12px; color:#ffdda0; opacity:0.9; }
+</style>
+<style>
+body, .leaflet-container, .leaflet-popup-content, .leaflet-tooltip {
+  font-family: 'Microsoft JhengHei', 'Trebuchet MS', sans-serif !important;
+  font-weight: bold !important;
+}
+.leaflet-popup-content {
+  font-size: 18px !important; /* 左下 popup 放大字體 */
+}
+</style><style>
+body, .leaflet-container, .leaflet-popup-content, .leaflet-tooltip, div {
+  font-family: 'Microsoft JhengHei', 'Trebuchet MS', sans-serif !important;
+  font-weight: bold !important;
+  font-size: 20px !important;
+}
+</style><style>
+body, .leaflet-container, .leaflet-popup-content, .leaflet-tooltip, div {
+  font-family: 'Microsoft JhengHei', 'Trebuchet MS', sans-serif !important;
+  font-weight: bold !important;
+  font-size: 18px !important;
+}
+</style><style>
+body, .leaflet-container, .leaflet-tooltip, div {
+  font-family: 'Microsoft JhengHei', 'Trebuchet MS', sans-serif !important;
+  font-weight: bold !important;
+  font-size: 18px !important;
+}
+.leaflet-popup-content {
+  font-size: 18px !important;
+  font-family: 'Microsoft JhengHei', 'Trebuchet MS', sans-serif !important;
+  font-weight: bold !important;
+  line-height: 1.6em !important;
+}
+.leaflet-popup-content-wrapper {
+  padding: 12px !important;
+}
+</style><style>
+.leaflet-popup-content h3 {
+  margin: 0 0 5px 0;
+  color: #ff7518;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: 'Microsoft JhengHei', 'Trebuchet MS', sans-serif;
+}
+.leaflet-popup-content p {
+  margin: 0;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: 'Microsoft JhengHei', 'Trebuchet MS', sans-serif;
+  line-height: 1.6em;
+}
+</style><style>
+/* popup 樣式 */
+.leaflet-popup-content h3 {
+  margin: 0 0 5px 0;
+  color: #ff7518;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: 'Microsoft JhengHei', 'Trebuchet MS', sans-serif;
+}
+.leaflet-popup-content p {
+  margin: 0;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: 'Microsoft JhengHei', 'Trebuchet MS', sans-serif;
+  line-height: 1.6em;
+}
+/* popup tip (小箭頭) 改成南瓜背景 */
+.leaflet-popup-tip {
+  background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDY0IDY0Ij4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9IiNmZjc1MTgiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMyIvPgo8cG9seWdvbiBwb2ludHM9IjIyLDMwIDI2LDM2IDE4LDM2IiBmaWxsPSJibGFjayIvPgo8cG9seWdvbiBwb2ludHM9IjQyLDMwIDQ2LDM2IDM4LDM2IiBmaWxsPSJibGFjayIvPgo8cG9seWdvbiBwb2ludHM9IjI2LDQ0IDM4LDQ0IDMyLDM2IiBmaWxsPSJibGFjayIvPgo8L3N2Zz4=") no-repeat center center;
+  background-size: cover;
+  width: 30px !important;
+  height: 30px !important;
+  border: none !important;
+  margin-top: -15px !important;
+}
+</style><style>
+.leaflet-interactive {
+  stroke: #ff7518 !important; /* 橘色邊界 */
+  stroke-width: 2;
+}
+.leaflet-interactive:hover {
+  stroke: #ffcc00 !important; /* 金黃 hover */
+}
+</style><style>
+.leaflet-control-attribution {
+  display: none !important;
+}
+</style><style>
+#info-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.6s ease-out, padding 0.3s ease;
+}
+#info-content.show {
+  max-height: 500px; /* 足夠容納內容的高度 */
+  padding: 10px;
+}
+</style><style>
+.leaflet-control {
+  font-size: 12px !important;   /* 字體縮小 */
+  padding: 2px 5px !important;  /* 內距縮小 */
+}
+
+.leaflet-control img {
+  width: 18px !important;       /* 縮小 icon */
+  height: 18px !important;
+}
+</style><style>
+.reset-button {
+  background: rgba(0,0,0,0.7);
+  padding: 4px;
+  border-radius: 8px;
+}
+.reset-button button:hover {
+  background: #ff7518;
+  color: black;
+}
+</style><style>
+.leaflet-control {
+  font-size: 10px !important;
+}
+</style></head>
+<body>
+<div style="position: fixed; 
+                 bottom: 30px; left: 30px; width:200px; height:160px; 
+                 border:2px solid orange; z-index:9999; font-size:12px;
+                 background-color:black; opacity:0.85; color:orange;
+                 padding:8px; border-radius:10px; box-shadow:0 0 10px orange;">
+<b style="color:orange;">🎃 圖例</b><br/>
+<i class="fa fa-map-marker" style="color:orange"></i> 北部/北台灣<br/>
+<i class="fa fa-map-marker" style="color:purple"></i> 中部/中台灣<br/>
+<i class="fa fa-map-marker" style="color:lime"></i> 南部/南台灣<br/>
+<i class="fa fa-map-marker" style="color:red"></i> 東部或其他<br/>
+</div>
+<div class="folium-map" id="map_fc07077eb93e7396ac9f3c31d203cb63"></div>
+<style>
+/* 蝙蝠動畫 */
+.bat {
+  position: fixed;
+  width: 40px;
+  height: 20px;
+  background: url('https://upload.wikimedia.org/wikipedia/commons/3/3a/Bat_icon.svg') no-repeat center/contain;
+  top: 10%;
+  left: -50px;
+  animation: flybat 12s linear infinite;
+  z-index: 9999;
+}
+.bat:nth-child(2) {
+  top: 30%;
+  animation-duration: 18s;
+  animation-delay: 3s;
+}
+.bat:nth-child(3) {
+  top: 50%;
+  animation-duration: 20s;
+  animation-delay: 6s;
+}
+@keyframes flybat {
+  0% { left: -60px; transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(10deg); }
+  100% { left: 110%; transform: scale(1) rotate(-10deg); }
+}
+
+/* 南瓜閃爍 */
+.pumpkin {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: url('https://upload.wikimedia.org/wikipedia/commons/9/99/Jack-o%27-Lantern_2003-10-31.jpg') no-repeat center/cover;
+  border-radius: 50%;
+  box-shadow: 0 0 15px 5px orange;
+  animation: flicker 2s infinite alternate;
+  z-index: 9999;
+}
+@keyframes flicker {
+  0% { opacity: 0.6; box-shadow: 0 0 5px 2px orange; }
+  50% { opacity: 1; box-shadow: 0 0 20px 8px darkorange; }
+  100% { opacity: 0.8; box-shadow: 0 0 10px 4px orange; }
+}
+</style>
+<div class="bat"></div>
+<div class="bat"></div>
+<div class="bat"></div>
+<div class="pumpkin"></div>
+<div class="ghost"></div>
+<div class="ghost ghost2"></div>
+<div class="ghost ghost3"></div>
+<div class="halloween-border"></div>
+<script>
+// play / pause 控制
+const audio = document.getElementById('spookyAudio');
+const btn = document.getElementById('playBtn');
+btn.addEventListener('click', ()=>{
+  if (audio.paused) {
+    audio.play().catch(()=>{ alert('瀏覽器可能阻擋自動播放，請允許播放或再次點擊。'); });
+    btn.textContent = '⏸ 暫停音效';
+    btn.classList.remove('paused');
+  } else {
+    audio.pause();
+    btn.textContent = '▶ 播放音效';
+    btn.classList.add('paused');
+  }
+});
+
+// 替換現有 awesome-marker 裡的 icon 內容（用南瓜/鬼圖示）
+function replaceMarkerImages() {
+  // 南瓜與鬼圖示來源
+  const pumpkin = 'https://upload.wikimedia.org/wikipedia/commons/7/73/Jack-o%27-lantern_flat_icon.png';
+  const ghost = 'https://upload.wikimedia.org/wikipedia/commons/4/4f/White_ghost_icon.svg';
+  const bat = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Bat_icon.svg';
+  // 找到所有 marker icon 的 DOM 元素
+  const icons = document.querySelectorAll('.awesome-marker .awesome-marker-icon, .awesome-marker-icon');
+  icons.forEach((el, idx)=>{
+    // 隨機在南瓜、鬼、蝙蝠三種中挑一個作為圖示
+    const picks = [pumpkin, ghost, bat];
+    const pick = picks[idx % picks.length];
+    // 若已經放 img，就更新 src；否則插入 img
+    let img = el.querySelector('img');
+    if (!img) {
+      img = document.createElement('img');
+      img.style.width = '34px';
+      img.style.height = '34px';
+      img.style.pointerEvents = 'none';
+      el.appendChild(img);
+    }
+    img.src = pick;
+    // 調整大小讓它看起來像 marker
+    img.style.marginTop = '2px';
+  });
+}
+
+// 在地圖建立後延遲呼叫替換（確保 markers 已生成）
+window.addEventListener('load', ()=>{
+  setTimeout(replaceMarkerImages, 600);
+});
+
+</script>
+<script>
+// 自訂南瓜燈 Icon
+var pumpkinIcon = L.icon({
+    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDY0IDY0Ij4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9IiNmZjc1MTgiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMyIvPgo8cG9seWdvbiBwb2ludHM9IjIyLDMwIDI2LDM2IDE4LDM2IiBmaWxsPSJibGFjayIvPgo8cG9seWdvbiBwb2ludHM9IjQyLDMwIDQ2LDM2IDM4LDM2IiBmaWxsPSJibGFjayIvPgo8cG9seWdvbiBwb2ludHM9IjI2LDQ0IDM4LDQ0IDMyLDM2IiBmaWxsPSJibGFjayIvPgo8L3N2Zz4=',
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -35]
+});
+
+// 取代所有 marker
+if (typeof geojson !== 'undefined') {
+    geojson.eachLayer(function(layer) {
+        if (layer.getLatLng) {
+            var latlng = layer.getLatLng();
+            L.marker(latlng, { icon: pumpkinIcon }).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        }
+    });
+}
+</script><script>
+// 定義南瓜燈 Icon
+var pumpkinIcon = L.icon({
+    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDY0IDY0Ij4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9IiNmZjc1MTgiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMyIvPgo8cG9seWdvbiBwb2ludHM9IjIyLDMwIDI2LDM2IDE4LDM2IiBmaWxsPSJibGFjayIvPgo8cG9seWdvbiBwb2ludHM9IjQyLDMwIDQ2LDM2IDM4LDM2IiBmaWxsPSJibGFjayIvPgo8cG9seWdvbiBwb2ludHM9IjI2LDQ0IDM4LDQ0IDMyLDM2IiBmaWxsPSJibGFjayIvPgo8L3N2Zz4=',
+    iconSize: [50, 50],
+    iconAnchor: [25, 50],
+    popupAnchor: [0, -40]
+});
+
+// 在台灣中央加一顆南瓜 marker
+L.marker([23.5, 121], { icon: pumpkinIcon })
+  .addTo(map)
+  .bindPopup("<h3>🎃 萬聖節地標</h3><p>這裡是台灣中央的南瓜燈！</p>");
+</script><div id="info-box" style="
+position: fixed;
+top: 20px;
+right: 20px;
+width: 320px;
+background: rgba(0,0,0,0.85);
+color: #ff7518;
+border: 2px solid #ff7518;
+border-radius: 8px;
+font-family: 'Microsoft JhengHei', 'Trebuchet MS', sans-serif;
+font-size: 16px;
+font-weight: bold;
+z-index: 99999;
+box-shadow: 0 0 15px rgba(255,117,24,0.8);
+"><div id="info-toggle" style="padding: 10px; cursor: pointer; text-align: center;">📌 點我展開介紹</div><div id="info-content" style="display: none; padding: 10px; line-height: 1.6em; white-space: pre-line;">🎃 2025台灣萬聖節地圖 🎃
+
+✨ 功能亮點 ✨
+- 拖曳地圖，探索幽暗角落
+- 點擊地標，發現隱藏驚喜
+- 放大縮小，揭開更多秘密地標
+
+👻
+今夜，台灣化身鬼魅舞台——
+南瓜燈火、幽靈低語、血紅月光，
+等待勇敢的你來揭開恐怖傳說！</div></div><script>
+document.getElementById("info-toggle").addEventListener("click", function() {
+  var content = document.getElementById("info-content");
+  if (content.classList.contains("show")) {
+    content.classList.remove("show");
+    this.textContent = "📌 點我展開介紹";
+  } else {
+    content.classList.add("show");
+    this.textContent = "📌 收起介紹";
+  }
+});
+</script><script>
+// 定義南瓜 icon
+var pumpkinIcon = L.icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/4151/4151022.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+});
+
+// 活動地點清單
+var locations = [
+  {
+    name: "台北市政府廣場",
+    addr: "110 台北市信義區市府路45號",
+    coords: [25.0375, 121.5637]
+  },
+  {
+    name: "台中草悟道園區",
+    addr: "403 台中市西區英才路",
+    coords: [24.1477, 120.6648]
+  },
+  {
+    name: "高雄駁二藝術特區",
+    addr: "803 高雄市鹽埕區蓬萊路99號",
+    coords: [22.6198, 120.2790]
+  },
+  {
+    name: "台南孔廟文化園區",
+    addr: "700 台南市中西區南門路2段89號",
+    coords: [22.9933, 120.2040]
+  },
+  {
+    name: "花蓮東大門夜市",
+    addr: "970 花蓮縣花蓮市中華路與成功街口",
+    coords: [23.9769, 121.6044]
+  }
+];
+
+// 加 marker 到地圖
+var markers = {};
+locations.forEach(loc => {
+  var marker = L.marker(loc.coords, {icon: pumpkinIcon}).addTo(map);
+  marker.bindPopup("🎃 <b>" + loc.name + "</b><br>" + loc.addr);
+  markers[loc.name] = marker;
+});
+
+// 讓右下角活動資訊可以點擊跳轉
+document.querySelectorAll("#event-info-panel strong, #event-info-panel div").forEach(el => {
+  el.addEventListener("click", function() {
+    var text = this.innerText;
+    locations.forEach(loc => {
+      if (text.includes(loc.name)) {
+        map.setView(loc.coords, 15);
+        markers[loc.name].openPopup();
+      }
+    });
+  });
+});
+
+// 加一個重置地圖按鈕
+var resetBtn = L.control({position: 'topleft'});
+resetBtn.onAdd = function (map) {
+  var div = L.DomUtil.create('div', 'reset-button');
+  div.innerHTML = '<button style="background:black; color:#ff7518; border:2px solid #ff7518; padding:6px 12px; border-radius:6px; cursor:pointer;">🔄 重置地圖</button>';
+  div.firstChild.onclick = function() {
+    map.setView([23.7, 121], 7);
+  }
+  return div;
+};
+resetBtn.addTo(map);
+</script><div id="map-banner" style="
+position: fixed;
+top: 10px;
+left: 10px;
+padding: 8px 16px;
+background: rgba(0,0,0,0.8);
+color: #ff7518;
+font-family: 'Microsoft JhengHei', 'Trebuchet MS', sans-serif;
+font-size: 20px;
+font-weight: bold;
+border: 2px solid #ff7518;
+border-radius: 6px;
+z-index: 99999;
+box-shadow: 0 0 12px rgba(255,117,24,0.8);
+">🎃 Star.xy Halloween Map 🎃</div></body>
+<script>
+    
+    
+            var map_fc07077eb93e7396ac9f3c31d203cb63 = L.map(
+                "map_fc07077eb93e7396ac9f3c31d203cb63",
+                {
+                    center: [23.7, 121.0],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 7,
+                    zoomControl: true,
+                    minZoom: 6,
+                    maxZoom: 12,
+                    maxBounds: [[21.6, 119.0], [25.6, 122.6]],
+                    maxBoundsViscosity: 1.0,
+                    preferCanvas: false,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_dd59ed02eaeb147a0f6fe26f6fbf091e = L.tileLayer(
+                "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png",
+                {"attribution": "\u0026copy; \u003ca href=\"http://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"http://cartodb.com/attributions\"\u003eCartoDB\u003c/a\u003e, CartoDB \u003ca href =\"http://cartodb.com/attributions\"\u003eattributions\u003c/a\u003e", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var marker_1a9138d1b3ac0a7141ff6896fbcae3ea = L.marker(
+                [25.052, 121.5203],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_685c1a55faeb41d9544d13d71e4959b8 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_1a9138d1b3ac0a7141ff6896fbcae3ea.setIcon(icon_685c1a55faeb41d9544d13d71e4959b8);
+        
+    
+        var popup_e2c784d6e26c1a5ca2c81e847fc73a84 = L.popup({"maxWidth": 300});
+
+        
+            var html_14d7be593c6ac004fa5b8e1e4d34747c = $(`<div id="html_14d7be593c6ac004fa5b8e1e4d34747c" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">心中山萬聖節 哈囉鬼派對</b><br>       地點：臺北市中山區<br>       時間：10/3–10/26<br>       <a href="https://www.travel.taipei/zh-tw/event-calendar/details/62238" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_e2c784d6e26c1a5ca2c81e847fc73a84.setContent(html_14d7be593c6ac004fa5b8e1e4d34747c);
+        
+
+        marker_1a9138d1b3ac0a7141ff6896fbcae3ea.bindPopup(popup_e2c784d6e26c1a5ca2c81e847fc73a84)
+        ;
+
+        
+    
+    
+            marker_1a9138d1b3ac0a7141ff6896fbcae3ea.bindTooltip(
+                `<div>
+                     心中山萬聖節 哈囉鬼派對
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_835009c91e504108eb74e5f113bce501 = L.marker(
+                [25.1119, 121.5331],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_8bfbe460bdf4b8dfcf34a07d729228cc = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_835009c91e504108eb74e5f113bce501.setIcon(icon_8bfbe460bdf4b8dfcf34a07d729228cc);
+        
+    
+        var popup_f4c40381dffcfd1b9198b2cbb681e451 = L.popup({"maxWidth": 300});
+
+        
+            var html_b1cf461c0badc4e561b175e7784380fc = $(`<div id="html_b1cf461c0badc4e561b175e7784380fc" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">天母搞什麼鬼 (第17屆)</b><br>       地點：臺北市天母<br>       時間：10/24–10/25<br>       <a href="https://bewithnene.tw/halloween_taiwan/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_f4c40381dffcfd1b9198b2cbb681e451.setContent(html_b1cf461c0badc4e561b175e7784380fc);
+        
+
+        marker_835009c91e504108eb74e5f113bce501.bindPopup(popup_f4c40381dffcfd1b9198b2cbb681e451)
+        ;
+
+        
+    
+    
+            marker_835009c91e504108eb74e5f113bce501.bindTooltip(
+                `<div>
+                     天母搞什麼鬼 (第17屆)
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_2e155db91691454b3467ddbcf3db26fe = L.marker(
+                [25.033968, 121.564468],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_89c6a6fd79d7074d0b020086b1c6383d = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_2e155db91691454b3467ddbcf3db26fe.setIcon(icon_89c6a6fd79d7074d0b020086b1c6383d);
+        
+    
+        var popup_bf6b87c3e2269ee34d771051e910793f = L.popup({"maxWidth": 300});
+
+        
+            var html_684e47db6ee883e78c0eccbbbf0fd67d = $(`<div id="html_684e47db6ee883e78c0eccbbbf0fd67d" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">台北101 萬聖南瓜派對</b><br>       地點：台北市信義區<br>       時間：10月下旬<br>       <a href="https://www.taipei-101.com.tw/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_bf6b87c3e2269ee34d771051e910793f.setContent(html_684e47db6ee883e78c0eccbbbf0fd67d);
+        
+
+        marker_2e155db91691454b3467ddbcf3db26fe.bindPopup(popup_bf6b87c3e2269ee34d771051e910793f)
+        ;
+
+        
+    
+    
+            marker_2e155db91691454b3467ddbcf3db26fe.bindTooltip(
+                `<div>
+                     台北101 萬聖南瓜派對
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_d9da43038cf84bd35e6e7185d2af6510 = L.marker(
+                [25.086, 121.5165],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_5052567d6b91b1e7e07bc4825f5c5c3a = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_d9da43038cf84bd35e6e7185d2af6510.setIcon(icon_5052567d6b91b1e7e07bc4825f5c5c3a);
+        
+    
+        var popup_8041ce4e6f07108c478e4170b349ce2d = L.popup({"maxWidth": 300});
+
+        
+            var html_2f633777e042d7ef0d714f76f9daaa26 = $(`<div id="html_2f633777e042d7ef0d714f76f9daaa26" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">兒童新樂園 萬聖變裝點心趴</b><br>       地點：臺北市士林區<br>       時間：10/24–10/26<br>       <a href="https://bewithnene.tw/halloween_taiwan/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_8041ce4e6f07108c478e4170b349ce2d.setContent(html_2f633777e042d7ef0d714f76f9daaa26);
+        
+
+        marker_d9da43038cf84bd35e6e7185d2af6510.bindPopup(popup_8041ce4e6f07108c478e4170b349ce2d)
+        ;
+
+        
+    
+    
+            marker_d9da43038cf84bd35e6e7185d2af6510.bindTooltip(
+                `<div>
+                     兒童新樂園 萬聖變裝點心趴
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_cce855bed231df7fbb42fef6e1a0caaf = L.marker(
+                [25.0125, 121.4628],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_a854b58c5e4f04e32250fe3ece7c99bd = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_cce855bed231df7fbb42fef6e1a0caaf.setIcon(icon_a854b58c5e4f04e32250fe3ece7c99bd);
+        
+    
+        var popup_c00dbc113c43bad72ae62c73af335ba3 = L.popup({"maxWidth": 300});
+
+        
+            var html_fce518a79348cb8fab1a3e11895b7295 = $(`<div id="html_fce518a79348cb8fab1a3e11895b7295" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">府中奇幻城 (板橋)</b><br>       地點：新北市板橋區<br>       時間：10/25–10/26<br>       <a href="https://bewithnene.tw/halloween_taiwan/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_c00dbc113c43bad72ae62c73af335ba3.setContent(html_fce518a79348cb8fab1a3e11895b7295);
+        
+
+        marker_cce855bed231df7fbb42fef6e1a0caaf.bindPopup(popup_c00dbc113c43bad72ae62c73af335ba3)
+        ;
+
+        
+    
+    
+            marker_cce855bed231df7fbb42fef6e1a0caaf.bindTooltip(
+                `<div>
+                     府中奇幻城 (板橋)
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_5182d25d61b3025cecc67dfa33163150 = L.marker(
+                [24.9935, 121.3005],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_26342bee8329a0ab57aff36c0df384ab = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_5182d25d61b3025cecc67dfa33163150.setIcon(icon_26342bee8329a0ab57aff36c0df384ab);
+        
+    
+        var popup_d073c7f68eea5a18c669d616440a4f3d = L.popup({"maxWidth": 300});
+
+        
+            var html_59995a3113c5b13f589fa12009881ffd = $(`<div id="html_59995a3113c5b13f589fa12009881ffd" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">桃園 萬聖城 (Halloween City)</b><br>       地點：桃園市<br>       時間：10/25–11/2<br>       <a href="https://travel.tycg.gov.tw/zh-tw/event/calendardetail/5226" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_d073c7f68eea5a18c669d616440a4f3d.setContent(html_59995a3113c5b13f589fa12009881ffd);
+        
+
+        marker_5182d25d61b3025cecc67dfa33163150.bindPopup(popup_d073c7f68eea5a18c669d616440a4f3d)
+        ;
+
+        
+    
+    
+            marker_5182d25d61b3025cecc67dfa33163150.bindTooltip(
+                `<div>
+                     桃園 萬聖城 (Halloween City)
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_e333169583b2137a4d49d1648d317272 = L.marker(
+                [24.8642, 121.2168],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_75dd75acd7c64eccbb0dea7926eddd6b = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_e333169583b2137a4d49d1648d317272.setIcon(icon_75dd75acd7c64eccbb0dea7926eddd6b);
+        
+    
+        var popup_24e9250453185a835018c877fadb9075 = L.popup({"maxWidth": 300});
+
+        
+            var html_fd429776e8c02944da938490f8db9728 = $(`<div id="html_fd429776e8c02944da938490f8db9728" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">小人國 萬聖節 / 驚悚活動</b><br>       地點：桃園市<br>       時間：9/6–<br>       <a href="https://tristaracc.com/blogs/%E5%B9%BC%E5%85%92%E5%8F%8A%E5%85%92%E7%AB%A5%E6%89%8B%E4%BD%9C/2025-holloween" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_24e9250453185a835018c877fadb9075.setContent(html_fd429776e8c02944da938490f8db9728);
+        
+
+        marker_e333169583b2137a4d49d1648d317272.bindPopup(popup_24e9250453185a835018c877fadb9075)
+        ;
+
+        
+    
+    
+            marker_e333169583b2137a4d49d1648d317272.bindTooltip(
+                `<div>
+                     小人國 萬聖節 / 驚悚活動
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_d12efc319dbbfa9de73f7a66354fd440 = L.marker(
+                [24.8413, 121.1826],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_ace1a5e9993733bec50866d6f00ed873 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_d12efc319dbbfa9de73f7a66354fd440.setIcon(icon_ace1a5e9993733bec50866d6f00ed873);
+        
+    
+        var popup_f553fe249a337c7174b46ede733e43cf = L.popup({"maxWidth": 300});
+
+        
+            var html_1e53cb71e11429515540ac74e8da409a = $(`<div id="html_1e53cb71e11429515540ac74e8da409a" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">六福村 墓碑鎮</b><br>       地點：新竹縣關西鎮<br>       時間：9/6–11/20<br>       <a href="https://www.leofoo.com.tw/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_f553fe249a337c7174b46ede733e43cf.setContent(html_1e53cb71e11429515540ac74e8da409a);
+        
+
+        marker_d12efc319dbbfa9de73f7a66354fd440.bindPopup(popup_f553fe249a337c7174b46ede733e43cf)
+        ;
+
+        
+    
+    
+            marker_d12efc319dbbfa9de73f7a66354fd440.bindTooltip(
+                `<div>
+                     六福村 墓碑鎮
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_ed340b6f33f3dee4d3c5447aed05514f = L.marker(
+                [24.3219, 120.6926],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_1297d2d5c79f8bbfdd1f549098007265 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "purple", "prefix": "glyphicon"}
+            );
+            marker_ed340b6f33f3dee4d3c5447aed05514f.setIcon(icon_1297d2d5c79f8bbfdd1f549098007265);
+        
+    
+        var popup_b50a1a357ae19f2e2afa1a89e72fce4d = L.popup({"maxWidth": 300});
+
+        
+            var html_9b0c6002f09ae4085418225381973a9c = $(`<div id="html_9b0c6002f09ae4085418225381973a9c" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">麗寶樂園 萬聖不給糖</b><br>       地點：台中市后里區<br>       時間：即日起–11/3<br>       <a href="https://www.lihpaoresort.com/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_b50a1a357ae19f2e2afa1a89e72fce4d.setContent(html_9b0c6002f09ae4085418225381973a9c);
+        
+
+        marker_ed340b6f33f3dee4d3c5447aed05514f.bindPopup(popup_b50a1a357ae19f2e2afa1a89e72fce4d)
+        ;
+
+        
+    
+    
+            marker_ed340b6f33f3dee4d3c5447aed05514f.bindTooltip(
+                `<div>
+                     麗寶樂園 萬聖不給糖
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_d4d7253d768cc60c2cd9575b2ae979f1 = L.marker(
+                [24.178, 120.646],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_385432978abbb2c8cee2f32da83a4771 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "purple", "prefix": "glyphicon"}
+            );
+            marker_d4d7253d768cc60c2cd9575b2ae979f1.setIcon(icon_385432978abbb2c8cee2f32da83a4771);
+        
+    
+        var popup_acd167d0da400c032d346e645de3651a = L.popup({"maxWidth": 300});
+
+        
+            var html_337bbe4085181f4b065d571117448d2e = $(`<div id="html_337bbe4085181f4b065d571117448d2e" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">逢甲商圈 萬聖節嘉年華</b><br>       地點：台中市西屯區<br>       時間：10/24–10/31<br>       <a href="https://bewithnene.tw/halloween_taiwan/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_acd167d0da400c032d346e645de3651a.setContent(html_337bbe4085181f4b065d571117448d2e);
+        
+
+        marker_d4d7253d768cc60c2cd9575b2ae979f1.bindPopup(popup_acd167d0da400c032d346e645de3651a)
+        ;
+
+        
+    
+    
+            marker_d4d7253d768cc60c2cd9575b2ae979f1.bindTooltip(
+                `<div>
+                     逢甲商圈 萬聖節嘉年華
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_66e448b4845a0ea206f6f71204d3d26a = L.marker(
+                [23.6755, 120.7994],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_bbb60b139fa992abe72a3d938888618d = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "purple", "prefix": "glyphicon"}
+            );
+            marker_66e448b4845a0ea206f6f71204d3d26a.setIcon(icon_bbb60b139fa992abe72a3d938888618d);
+        
+    
+        var popup_c1d50b11d3472fad2697b317645f1e72 = L.popup({"maxWidth": 300});
+
+        
+            var html_6098746f199b69625e9f62f3d0ef0d23 = $(`<div id="html_6098746f199b69625e9f62f3d0ef0d23" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">溪頭 妖怪萬聖嘉年華</b><br>       地點：南投縣鹿谷鄉 溪頭<br>       時間：10/26–10/27<br>       <a href="https://housefeel.com.tw/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_c1d50b11d3472fad2697b317645f1e72.setContent(html_6098746f199b69625e9f62f3d0ef0d23);
+        
+
+        marker_66e448b4845a0ea206f6f71204d3d26a.bindPopup(popup_c1d50b11d3472fad2697b317645f1e72)
+        ;
+
+        
+    
+    
+            marker_66e448b4845a0ea206f6f71204d3d26a.bindTooltip(
+                `<div>
+                     溪頭 妖怪萬聖嘉年華
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_86ac3205452d3154ae0045d9e51d37c1 = L.marker(
+                [23.7019, 120.554],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_66d11febe99e9274baa32f85960ee99c = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "purple", "prefix": "glyphicon"}
+            );
+            marker_86ac3205452d3154ae0045d9e51d37c1.setIcon(icon_66d11febe99e9274baa32f85960ee99c);
+        
+    
+        var popup_b69f497a94405bd8ca029ea471f967ea = L.popup({"maxWidth": 300});
+
+        
+            var html_21a0ba245fd84f7db2a45270ee6b5f40 = $(`<div id="html_21a0ba245fd84f7db2a45270ee6b5f40" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">劍湖山 世界 鬼怪嘉年華</b><br>       地點：雲林縣<br>       時間：即日起–11/3<br>       <a href="https://www.janfusun.com.tw/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_b69f497a94405bd8ca029ea471f967ea.setContent(html_21a0ba245fd84f7db2a45270ee6b5f40);
+        
+
+        marker_86ac3205452d3154ae0045d9e51d37c1.bindPopup(popup_b69f497a94405bd8ca029ea471f967ea)
+        ;
+
+        
+    
+    
+            marker_86ac3205452d3154ae0045d9e51d37c1.bindTooltip(
+                `<div>
+                     劍湖山 世界 鬼怪嘉年華
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_10f01e5c94b49734c5e32082bf70c2a5 = L.marker(
+                [23.0017, 120.3007],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_3c1ccdf5c613470f8d52226a462dcbac = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_10f01e5c94b49734c5e32082bf70c2a5.setIcon(icon_3c1ccdf5c613470f8d52226a462dcbac);
+        
+    
+        var popup_af8186384a25d07d7dabe75c8b1d6439 = L.popup({"maxWidth": 300});
+
+        
+            var html_1b283bcaaf17fef4aa06be7173cc6cb0 = $(`<div id="html_1b283bcaaf17fef4aa06be7173cc6cb0" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">十鼓萬聖派對 (台南 十鼓文創園區)</b><br>       地點：台南市仁德區<br>       時間：10/24–10/26<br>       <a href="https://tendrum.com.tw/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_af8186384a25d07d7dabe75c8b1d6439.setContent(html_1b283bcaaf17fef4aa06be7173cc6cb0);
+        
+
+        marker_10f01e5c94b49734c5e32082bf70c2a5.bindPopup(popup_af8186384a25d07d7dabe75c8b1d6439)
+        ;
+
+        
+    
+    
+            marker_10f01e5c94b49734c5e32082bf70c2a5.bindTooltip(
+                `<div>
+                     十鼓萬聖派對 (台南 十鼓文創園區)
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_c5a5c7172bcfd36e65024927fd212e97 = L.marker(
+                [22.9979, 120.1976],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_951f7faea38dbb8d314b35eaae8d40bd = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_c5a5c7172bcfd36e65024927fd212e97.setIcon(icon_951f7faea38dbb8d314b35eaae8d40bd);
+        
+    
+        var popup_0a65d45281bf1e796bb07ade77408f57 = L.popup({"maxWidth": 300});
+
+        
+            var html_bc598fe94c24780c00604d55a340b599 = $(`<div id="html_bc598fe94c24780c00604d55a340b599" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">台南 海安夜行鬼市 × DJ 狂歡派對</b><br>       地點：台南市中西區海安商圈<br>       時間：10/25–10/26<br>       <a href="https://www.tainanoutlook.com/activities/halloween" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_0a65d45281bf1e796bb07ade77408f57.setContent(html_bc598fe94c24780c00604d55a340b599);
+        
+
+        marker_c5a5c7172bcfd36e65024927fd212e97.bindPopup(popup_0a65d45281bf1e796bb07ade77408f57)
+        ;
+
+        
+    
+    
+            marker_c5a5c7172bcfd36e65024927fd212e97.bindTooltip(
+                `<div>
+                     台南 海安夜行鬼市 × DJ 狂歡派對
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_002e929825343757987a82b38b847a1e = L.marker(
+                [23.0006, 120.2196],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_ba50c362a4ec110266094407fa32c38e = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_002e929825343757987a82b38b847a1e.setIcon(icon_ba50c362a4ec110266094407fa32c38e);
+        
+    
+        var popup_819c8453a814194144466d75c3591f97 = L.popup({"maxWidth": 300});
+
+        
+            var html_dfb1958a398757a94e698de10fa749b3 = $(`<div id="html_dfb1958a398757a94e698de10fa749b3" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">台南 成大商圈 封街遊行</b><br>       地點：台南市東區 成功大學周邊<br>       時間：10/25–10/26<br>       <a href="https://www.tainanoutlook.com/activities/halloween" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_819c8453a814194144466d75c3591f97.setContent(html_dfb1958a398757a94e698de10fa749b3);
+        
+
+        marker_002e929825343757987a82b38b847a1e.bindPopup(popup_819c8453a814194144466d75c3591f97)
+        ;
+
+        
+    
+    
+            marker_002e929825343757987a82b38b847a1e.bindTooltip(
+                `<div>
+                     台南 成大商圈 封街遊行
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_e45804c765952c91baa0cc5a00605aa5 = L.marker(
+                [22.7291, 120.4011],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_19cea7b94bb35c843be383a5236a3770 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_e45804c765952c91baa0cc5a00605aa5.setIcon(icon_19cea7b94bb35c843be383a5236a3770);
+        
+    
+        var popup_0db6768913fc32eefe6313f164c3e5c4 = L.popup({"maxWidth": 300});
+
+        
+            var html_fbfa43cea554ee4919650bcbe9531117 = $(`<div id="html_fbfa43cea554ee4919650bcbe9531117" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">義大世界 萬聖月</b><br>       地點：高雄市大樹區<br>       時間：多個週末<br>       <a href="https://www.edathemepark.com.tw/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_0db6768913fc32eefe6313f164c3e5c4.setContent(html_fbfa43cea554ee4919650bcbe9531117);
+        
+
+        marker_e45804c765952c91baa0cc5a00605aa5.bindPopup(popup_0db6768913fc32eefe6313f164c3e5c4)
+        ;
+
+        
+    
+    
+            marker_e45804c765952c91baa0cc5a00605aa5.bindTooltip(
+                `<div>
+                     義大世界 萬聖月
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_96a25dadbf630cf30b593242d5b4063d = L.marker(
+                [22.626, 120.284],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_e67db6f0893face1c46657df9c850bfd = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_96a25dadbf630cf30b593242d5b4063d.setIcon(icon_e67db6f0893face1c46657df9c850bfd);
+        
+    
+        var popup_8b2ee8722b63f62cfa004cbd0187594b = L.popup({"maxWidth": 300});
+
+        
+            var html_a8f1093d9ab1fad846ba926b98a9f2de = $(`<div id="html_a8f1093d9ab1fad846ba926b98a9f2de" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">駁二藝術特區 萬聖節市集</b><br>       地點：高雄市鹽埕區<br>       時間：10/24–10/31<br>       <a href="https://pier2.org/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_8b2ee8722b63f62cfa004cbd0187594b.setContent(html_a8f1093d9ab1fad846ba926b98a9f2de);
+        
+
+        marker_96a25dadbf630cf30b593242d5b4063d.bindPopup(popup_8b2ee8722b63f62cfa004cbd0187594b)
+        ;
+
+        
+    
+    
+            marker_96a25dadbf630cf30b593242d5b4063d.bindTooltip(
+                `<div>
+                     駁二藝術特區 萬聖節市集
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_9a3e20e0b18fc51660682a2f3f901345 = L.marker(
+                [23.9554, 121.6009],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_4d6272d5221b6500c1a6fad035ca9dd9 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "purple", "prefix": "glyphicon"}
+            );
+            marker_9a3e20e0b18fc51660682a2f3f901345.setIcon(icon_4d6272d5221b6500c1a6fad035ca9dd9);
+        
+    
+        var popup_0ce2d8d1684a6959c211c20191667eee = L.popup({"maxWidth": 300});
+
+        
+            var html_2afb5943330867b81fc67b58bea0ff9b = $(`<div id="html_2afb5943330867b81fc67b58bea0ff9b" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">遠雄海洋公園 Halloween 小鬼祭</b><br>       地點：花蓮縣壽豐鄉<br>       時間：9/6–11/2<br>       <a href="https://www.farglory-oceanpark.com.tw/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_0ce2d8d1684a6959c211c20191667eee.setContent(html_2afb5943330867b81fc67b58bea0ff9b);
+        
+
+        marker_9a3e20e0b18fc51660682a2f3f901345.bindPopup(popup_0ce2d8d1684a6959c211c20191667eee)
+        ;
+
+        
+    
+    
+            marker_9a3e20e0b18fc51660682a2f3f901345.bindTooltip(
+                `<div>
+                     遠雄海洋公園 Halloween 小鬼祭
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_458780d7b72234c961b354269e9276b1 = L.marker(
+                [23.4914, 120.453],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_b6fb0364fe184b963530b4fce47e4212 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_458780d7b72234c961b354269e9276b1.setIcon(icon_b6fb0364fe184b963530b4fce47e4212);
+        
+    
+        var popup_806f1e1416802be521b7285a506437cb = L.popup({"maxWidth": 300});
+
+        
+            var html_8e3220f51ba5a9750c81e59225e3d262 = $(`<div id="html_8e3220f51ba5a9750c81e59225e3d262" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">嘉義 佐登妮絲城堡 萬聖南瓜搗蛋趴</b><br>       地點：嘉義縣<br>       時間：即日起–10/31<br>       <a href="https://housefeel.com.tw/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_806f1e1416802be521b7285a506437cb.setContent(html_8e3220f51ba5a9750c81e59225e3d262);
+        
+
+        marker_458780d7b72234c961b354269e9276b1.bindPopup(popup_806f1e1416802be521b7285a506437cb)
+        ;
+
+        
+    
+    
+            marker_458780d7b72234c961b354269e9276b1.bindTooltip(
+                `<div>
+                     嘉義 佐登妮絲城堡 萬聖南瓜搗蛋趴
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_c9c079b4c684f0916b3da8ca614a4a31 = L.marker(
+                [25.0335, 121.5379],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_a6a68459503a25c04f6453e29767da67 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "lime", "prefix": "glyphicon"}
+            );
+            marker_c9c079b4c684f0916b3da8ca614a4a31.setIcon(icon_a6a68459503a25c04f6453e29767da67);
+        
+    
+        var popup_39b47669b8655a589a3cf0f96850a620 = L.popup({"maxWidth": 300});
+
+        
+            var html_29f8e7a6dfccdd69f006ab6f0ffd3a60 = $(`<div id="html_29f8e7a6dfccdd69f006ab6f0ffd3a60" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">台北 ACC Halloween Party (家庭場)</b><br>       地點：台北市<br>       時間：10/31<br>       <a href="https://www.americanclub.org.tw/events/2025/10/2025-acc-halloween-party-dino-monster-bash/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_39b47669b8655a589a3cf0f96850a620.setContent(html_29f8e7a6dfccdd69f006ab6f0ffd3a60);
+        
+
+        marker_c9c079b4c684f0916b3da8ca614a4a31.bindPopup(popup_39b47669b8655a589a3cf0f96850a620)
+        ;
+
+        
+    
+    
+            marker_c9c079b4c684f0916b3da8ca614a4a31.bindTooltip(
+                `<div>
+                     台北 ACC Halloween Party (家庭場)
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_eaef9c9e59666893de7cfa1af93e730e = L.marker(
+                [23.7, 121.0],
+                {}
+            ).addTo(map_fc07077eb93e7396ac9f3c31d203cb63);
+        
+    
+            var icon_f3f0ed5166102b5a87f093dc21bae481 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "purple", "prefix": "glyphicon"}
+            );
+            marker_eaef9c9e59666893de7cfa1af93e730e.setIcon(icon_f3f0ed5166102b5a87f093dc21bae481);
+        
+    
+        var popup_3c6949288552771ea8f77a59462284b4 = L.popup({"maxWidth": 300});
+
+        
+            var html_75ab1073d40f668c237b05276ff4b881 = $(`<div id="html_75ab1073d40f668c237b05276ff4b881" style="width: 100.0%; height: 100.0%;">     <div style="font-family:Arial; font-size:12px; max-width:260px;">       <b style="font-size:13px;">全台 萬聖節活動懶人包 (集合多地活動)</b><br>       地點：全台<br>       時間：整體期間<br>       <a href="https://kuolife.com/taiwan-halloween-events-mustread/" target="_blank">活動介紹 / 官方連結</a>     </div>     </div>`)[0];
+            popup_3c6949288552771ea8f77a59462284b4.setContent(html_75ab1073d40f668c237b05276ff4b881);
+        
+
+        marker_eaef9c9e59666893de7cfa1af93e730e.bindPopup(popup_3c6949288552771ea8f77a59462284b4)
+        ;
+
+        
+    
+    
+            marker_eaef9c9e59666893de7cfa1af93e730e.bindTooltip(
+                `<div>
+                     全台 萬聖節活動懶人包 (集合多地活動)
+                 </div>`,
+                {"sticky": true}
+            );
+        
+</script>
+</html>
